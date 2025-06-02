@@ -128,6 +128,7 @@ int g_window2_count = 0;        // 第二个窗口的计数
 int g_window3_count = 0;        // 第三个窗口的计数
 int g_window4_count = 0;        // 第四个窗口的计数
 int i = 0;                      // 循环计数器
+int loop_count = 0;             // 循环计数器,用于控制循环计算速度
 
 // --- 函数声明 ---
 void generate_input_signal_buffer(void);
@@ -238,10 +239,10 @@ int main(void)
     while (1) { 
 
         // 记数超过一千次，则while循环不执行后续任务 TODO数组半满的时候把loop_count清零
-        while (i >= ADC_BUFFER_HALF_LENGTH) {
+        while (loop_count >= ADC_BUFFER_HALF_LENGTH) {
 
         }
-        if (i == 0) {
+        if (loop_count == 0) {
             flag_state = 1 - flag_state; // 切换标志位
 
             // 把ADC数组复制到input_signal_buffer中(暂时不做)
@@ -383,6 +384,7 @@ int main(void)
 
 
         i++; // 在循环末尾递增采样索引
+        loop_count++;
 
         // // 调试用的退出条件
         // if (i >= NUM_SAMPLES) {
