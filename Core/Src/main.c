@@ -40,7 +40,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 /*ADC采集储存数组*/
-#define ADC_BUFFER_LENGTH 10000
+#define ADC_BUFFER_LENGTH 1000
 uint16_t adc_buffer[ADC_BUFFER_LENGTH] ;
 float adc_voltage;//ADC转换电压值
 /*目标频率,输出模式*/
