@@ -328,12 +328,15 @@ int main(void)
         // }
 
         // 第一部分输出：重建信号的频率、幅值和相位  TODO串口输出
-        // printf("\n--- Current Recovered Signal Parameters ---\n");
-        printf("Frequency: %.2f Hz, Amplitude: %.4f V, Phase: %.2f deg\n", g_ref_freq, recovered_amplitude, recovered_phase_deg);
-        // printf("---------------------------------\n");
+        // 每秒输出一次
+        if (i % SAMPLING_RATE == 0) {   
+            // printf("\n--- Current Recovered Signal Parameters ---\n");
+            printf("Frequency: %.2f Hz, Amplitude: %.4f V, Phase: %.2f deg\n", g_ref_freq, recovered_amplitude, recovered_phase_deg);
+            // printf("---------------------------------\n");
+        }
 
         // 根据输出模式添加新的输出  TODO DAC输出
-        printf("--- 当前输出模式 %d 的额外信息 ---\n", g_output_mode);
+        // printf("--- 当前输出模式 %d 的额外信息 ---\n", g_output_mode);
         switch (g_output_mode) {
             case OUTPUT_MODE_RECOVERED_SIGNAL:
                 // printf("待测信号: %.4f, 重建信号: %.4f V\n", current_input_sample, recovered_signal);
