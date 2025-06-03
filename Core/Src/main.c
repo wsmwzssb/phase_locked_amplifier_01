@@ -105,6 +105,10 @@ float* X_buffer = NULL;
 float* Y_buffer = NULL;
 int buffer_index = 0;
 int buffer_filled = 0;
+// 用于增量平均值计算的全局变量
+float sum_X = 0.0f;     // X缓冲区的总和
+float sum_Y = 0.0f;     // Y缓冲区的总和
+int buffer_count = 0;   // 当前缓冲区中有效数据数量
 
 // 参考信号相位累加器
 double ref_phase_accumulator = 0.0f;
@@ -274,29 +278,42 @@ int main(void)
 
         // 4.4 更新缓冲区并计算平均值
         float current_filtered_X, current_filtered_Y;
+        // X_buffer[buffer_index] = mixed_X;
+        // Y_buffer[buffer_index] = mixed_Y;
+        // if (buffer_index >= BUFFER_SIZE - 1) {
+        //     buffer_filled = 1;
+        // }
+        // // 计算平均值
+        // float sum_X = 0.0f;
+        // float sum_Y = 0.0f;
+        // // 始终使用完整缓冲区大小进行平均，未填充的部分自动为0
+        // for (int j = 0; j < BUFFER_SIZE; j++) {
+        //     if (j <= buffer_index || buffer_filled) {
+        //         sum_X += X_buffer[j];
+        //         sum_Y += Y_buffer[j];
+        //     }
+        // }
+        // // 始终除以完整的缓冲区大小
+        // current_filtered_X = sum_X / BUFFER_SIZE;
+        // current_filtered_Y = sum_Y / BUFFER_SIZE;
+        // // 更新缓冲区索引
+        // buffer_index = (buffer_index + 1) % BUFFER_SIZE;
+        // 4.4 更新缓冲区并计算平均值 - 优化版本
+        // 如果缓冲区已满，减去要被覆盖的值
+        if (buffer_count >= BUFFER_SIZE) {
+            sum_X -= X_buffer[buffer_index];
+            sum_Y -= Y_buffer[buffer_index];
+        } else {
+            buffer_count++;
+        }
+        // 添加新值到缓冲区和总和
         X_buffer[buffer_index] = mixed_X;
         Y_buffer[buffer_index] = mixed_Y;
-        
-        if (buffer_index >= BUFFER_SIZE - 1) {
-            buffer_filled = 1;
-        }
-        
+        sum_X += mixed_X;
+        sum_Y += mixed_Y;
         // 计算平均值
-        float sum_X = 0.0f;
-        float sum_Y = 0.0f;
-        
-        // 始终使用完整缓冲区大小进行平均，未填充的部分自动为0
-        for (int j = 0; j < BUFFER_SIZE; j++) {
-            if (j <= buffer_index || buffer_filled) {
-                sum_X += X_buffer[j];
-                sum_Y += Y_buffer[j];
-            }
-        }
-        
-        // 始终除以完整的缓冲区大小
-        current_filtered_X = sum_X / BUFFER_SIZE;
-        current_filtered_Y = sum_Y / BUFFER_SIZE;
-        
+        current_filtered_X = sum_X / buffer_count;
+        current_filtered_Y = sum_Y / buffer_count;
         // 更新缓冲区索引
         buffer_index = (buffer_index + 1) % BUFFER_SIZE;
 
