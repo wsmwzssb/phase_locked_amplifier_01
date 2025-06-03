@@ -30,6 +30,8 @@
 #include "stdio.h"
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>    // 需要链接 -lm
+#include <time.h>    // 添加time.h用于计时
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +58,7 @@ OutputMode g_output_mode = OUTPUT_MODE_REF_COS_AND_RECOVERED;
 
 // --- 可配置参数 ---
 // 信号参数
-#define SAMPLING_RATE 10000.0f // 采样率 (Hz)，例如10kHz
+#define SAMPLING_RATE 1000 // 采样率 (Hz)，例如100kHz
 #define NUM_SAMPLES ((int)(SAMPLING_RATE * SIGNAL_DURATION)) // 总采样点数
 #define AVERAGE_TIME 0.2f      // 平均时间窗口长度（秒）
 #define BUFFER_SIZE ((int)(SAMPLING_RATE * AVERAGE_TIME)) // 缓冲区大小
@@ -223,11 +225,11 @@ int main(void)
   MX_TIM2_Init();
   MX_DAC_Init();
   /* USER CODE BEGIN 2 */
-	printf("Phase Locked Amplifier.");
+	printf("Phase Locked Amplifier.\r\n");
 	//开启DMA、PWM
 	HAL_ADC_Start_DMA(&hadc1,(uint32_t *)&input_signal_buffer,ADC_BUFFER_LENGTH);
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
-	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t *)output_chanel_1, ADC_BUFFER_LENGTH, DAC_ALIGN_12B_R);
+	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t *)input_signal_buffer, ADC_BUFFER_LENGTH, DAC_ALIGN_12B_R);
 	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t *)output_chanel_2, ADC_BUFFER_LENGTH, DAC_ALIGN_12B_R);
 	//开启命令接收
 	HAL_UART_Receive_IT(&huart1, &rx_buffer[rx_index], 1);
@@ -236,8 +238,9 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	int ppp=0;
     while (1) { 
-
+				ppp = loop_count;
         // 记数超过一千次，则while循环不执行后续任务 TODO数组半满的时候把loop_count清零
         while (loop_count >= ADC_BUFFER_HALF_LENGTH) {
 
@@ -330,11 +333,9 @@ int main(void)
 
         // 第一部分输出：重建信号的频率、幅值和相位  TODO串口输出
         // 每秒输出一次
-        if (i % SAMPLING_RATE == 0) {   
-            // printf("\n--- Current Recovered Signal Parameters ---\n");
-            printf("Frequency: %.2f Hz, Amplitude: %.4f V, Phase: %.2f deg\n", g_ref_freq, recovered_amplitude, recovered_phase_deg);
-            // printf("---------------------------------\n");
-        }
+        if (i % 100 == 0) {
+    printf("Frequency: %.2f Hz, Amplitude: %.4f V, Phase: %.2f deg\n", g_ref_freq, recovered_amplitude, recovered_phase_deg);
+}
 
         // 根据输出模式添加新的输出  TODO DAC输出
         // printf("--- 当前输出模式 %d 的额外信息 ---\n", g_output_mode);
@@ -385,7 +386,7 @@ int main(void)
 
         i++; // 在循环末尾递增采样索引
         loop_count++;
-
+				printf("i:%d  loop count:%d\n",i,loop_count);
         // // 调试用的退出条件
         // if (i >= NUM_SAMPLES) {
         //     break;
@@ -451,7 +452,8 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
     if (hadc->Instance == ADC1)
     {
         // 处理 adc_buffer[0] ~ adc_buffer[ADC_BUFFER_LENGTH/2]
-			
+        loop_count = 0; // 重置循环计数器
+			//printf("reset over\nloop count: %d",loop_count);
     }
 }
 
@@ -475,6 +477,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 }
 /*DAC*/
 //DAC读取一半，进入中断
+/*
 void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef* hdac)
 {
     //
@@ -484,6 +487,7 @@ void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef* hdac)
 {
     //printf("DAC DMA 传输完成\r\n");
 }
+*/
 /*USART*/
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {

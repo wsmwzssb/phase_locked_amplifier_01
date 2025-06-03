@@ -38,4 +38,6 @@ phase_locked_amplifier/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Core\Inc\tim.h ..\Core\Inc\usart.h ..\Core\Inc\gpio.h \
   C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdio.h \
   C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\string.h \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdlib.h
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdlib.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\math.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\time.h
